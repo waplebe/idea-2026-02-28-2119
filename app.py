@@ -2,8 +2,7 @@ from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
+from werkzeug.exceptions import HTTPException
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///tasks.db')
@@ -64,6 +63,10 @@ def delete_task(id):
     db.session.commit()
 
     return jsonify({'message': 'Task deleted'})
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    return jsonify({'message': str(e)}), e.code
 
 @app.before_first_request
 def create_tables():
